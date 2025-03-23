@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bling Software</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #000; color: white; text-align: center; }
+        .container { padding: 50px; }
+        h1 { font-size: 3em; text-shadow: 0px 0px 10px gold; }
+        .form-group { margin: 20px; }
+        input { width: 80%; padding: 10px; font-size: 1.2em; border: 2px solid gold; background-color: black; color: white; text-align: center; }
+        .btn { background-color: gold; color: black; padding: 10px 20px; border: none; font-size: 1.2em; cursor: pointer; }
+        .btn:hover { background-color: white; color: black; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>✨ Bling Software ✨</h1>
+        <p>Enter your details below:</p>
+
+        <!-- Name & Mobile Number Form -->
+        <form id="blingForm">
+            <div class="form-group">
+                <input type="text" id="name" placeholder="Enter Your Name" required>
+            </div>
+            <div class="form-group">
+                <input type="tel" id="mobile" placeholder="Enter Your Mobile Number" required>
+            </div>
+            <button type="button" class="btn" onclick="submitForm()">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        function submitForm() {
+            let name = document.getElementById("name").value;
+            let mobile = document.getElementById("mobile").value;
+
+            if (name === "" || mobile === "") {
+                alert("Please fill out all fields! ⚠️");
+                return;
+            }
+
+            // Get last invoice number from Local Storage
+            let lastInvoice = localStorage.getItem("invoiceNumber");
+            let invoiceNumber = lastInvoice ? parseInt(lastInvoice) + 1 : 1001; // Start from 1001
+
+            // Save new invoice number to Local Storage
+            localStorage.setItem("invoiceNumber", invoiceNumber);
+
+            let dateTime = new Date().toLocaleString(); // Current Date & Time
+
+            // Redirect to invoice page with details
+            let url = `invoice.html?name=${encodeURIComponent(name)}&mobile=${encodeURIComponent(mobile)}&invoice=${invoiceNumber}&date=${encodeURIComponent(dateTime)}`;
+            window.location.href = url;
+        }
+    </script>
+
+</body>
+</html>

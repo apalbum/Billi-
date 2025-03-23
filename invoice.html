@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - Bling Software</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #000; color: white; text-align: center; }
+        .container { padding: 50px; }
+        h1 { font-size: 2.5em; text-shadow: 0px 0px 10px gold; }
+        .invoice-box { background-color: black; border: 2px solid gold; padding: 20px; display: inline-block; text-align: left; box-shadow: 0px 0px 15px gold; }
+        table { width: 100%; margin-top: 20px; color: white; border-collapse: collapse; }
+        th, td { border: 1px solid gold; padding: 10px; text-align: center; }
+        .no-print { margin-top: 20px; background-color: gold; color: black; padding: 10px 20px; border: none; font-size: 1.2em; cursor: pointer; }
+        .no-print:hover { background-color: white; }
+        .qr-box { margin-top: 20px; } @media print {
+    .no-print {
+        display: none !important;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🧾 Ap-Album Print Invoice Details</h1>
+        
+       
+        <div class="invoice-box">
+            <p><strong>Name:</strong> <span id="userName"></span></p>
+            <p><strong>Mobile Number:</strong> <span id="userMobile"></span></p>
+            <p><strong>Invoice Number:</strong> <span id="invoiceNumber"></span></p>
+            <p><strong>Date & Time:</strong> <span id="dateTime"></span></p>
+        </div>
+
+        <h2>Add Items</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Sheet</th>
+                    <th>QTY</th>
+                    <th>Rate</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceTable">
+            </tbody>
+        </table>
+
+        <button class="no-print" onclick="addItem()">+ Add Item</button>
+        <h3>Total: ₹<span id="totalAmount">0</span></h3>
+
+        <!-- UPI QR Code -->
+        <div class="qr-box">
+            <h3>Scan to Pay</h3>
+            <img id="upiQr" src="" alt="UPI QR Code" width="200">
+        </div>
+
+        <button class="no-print" onclick="generateUPIQR()">Generate QR</button>
+        <button class="no-print" onclick="window.print()">Print Invoice</button>
+        <button class="no-print" onclick="generatePDF()">Send via WhatsApp (PDF)</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        document.getElementById("userName").textContent = urlParams.get("name");
+        document.getElementById("userMobile").textContent = urlParams.get("mobile");
+        document.getElementById("invoiceNumber").textContent = urlParams.get("invoice");
+        document.getElementById("dateTime").textContent = urlParams.get("date");
+
+        // Category-wise Sheet Options
+        const categorySheets = {
+            "NTR": ["NTR Gold", "NTR Silver", "NTR Premium"],
+            "Cover": ["Soft Cover", "Hard Cover", "Leather Cover"],
+            "TP/Poster": ["Glossy Poster", "Matte Poster", "Photo Poster"],
+            "Combo Box": ["Small Combo", "Medium Combo", "Large Combo"],
+            "Bag": ["Plastic Bag", "Canvas Bag", "Leather Bag"]
+        };
+
+        function addItem() {
+            let table = document.getElementById("invoiceTable");
+            let row = table.insertRow();
+
+            let cell1 = row.insertCell(0);
+            let cell2 = row.insertCell(1);
+            let cell3 = row.insertCell(2);
+            let cell4 = row.insertCell(3);
+            let cell5 = row.insertCell(4);
+            let cell6 = row.insertCell(5);
+
+            let categorySelect = document.createElement("select");
+            categorySelect.innerHTML = `
+                <option value="NTR">NTR</option>
+                <option value="Cover">Cover</option>
+                <option value="TP/Poster">TP/Poster</option>
+                <option value="Combo Box">Combo Box</option>
+                <option value="Bag">Bag</option>
+            `;
+            categorySelect.onchange = function() { updateSheetOptions(row, categorySelect.value); };
+            cell1.appendChild(categorySelect);
+
+            let sheetSelect = document.createElement("select");
+            updateSheetOptions(row, "NTR");
+            cell2.appendChild(sheetSelect);
+
+            cell3.innerHTML = `<input type="number" value="1" oninput="calculateTotal()">`;
+            cell4.innerHTML = `<input type="number" value="0" oninput="calculateTotal()">`;
+            cell5.innerHTML = `<span>₹0</span>`;
+            cell6.innerHTML = `<button onclick="removeItem(this)">❌</button>`;
+
+            function updateSheetOptions(row, category) {
+                sheetSelect.innerHTML = categorySheets[category].map(sheet => `<option value="${sheet}">${sheet}</option>`).join("");
+            }
+
+            calculateTotal();
+        }
+
+        function removeItem(button) {
+            let row = button.parentElement.parentElement;
+            row.remove();
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let table = document.getElementById("invoiceTable");
+            let rows = table.getElementsByTagName("tr");
+            let total = 0;
+
+            for (let row of rows) {
+                let qty = row.cells[2].querySelector("input").value;
+                let rate = row.cells[3].querySelector("input").value;
+                let amount = qty * rate;
+                row.cells[4].querySelector("span").textContent = `₹${amount}`;
+                total += amount;
+            }
+
+            document.getElementById("totalAmount").textContent = total;
+        }
+
+        function generateUPIQR() {
+    let upiId = "7544067465@ybl"; // अपना UPI ID डालें
+    let amountField = document.getElementById("totalAmount"); 
+
+    // अगर amountField एक <span> या <div> है, तो textContent यूज़ करें
+    let amount = parseFloat(amountField.textContent.trim()); 
+
+    // अगर amountField एक <input> है, तो value यूज़ करें
+    if (isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount before generating QR Code!");
+        return;
+    }
+
+    let upiUrl = `upi://pay?pa=${upiId}&pn=Invoice Payment&mc=0000&tid=TXN${Date.now()}&tr=INV-${Date.now()}&tn=Invoice%20Payment&am=${amount.toFixed(2)}&cu=INR`;
+
+    // QR Code Generate करने के लिए API लिंक
+    let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUrl)}`;
+
+    // QR कोड इमेज में सेट करें
+    document.getElementById("upiQr").src = qrUrl;
+}
+
+async function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+
+    // सही ID का उपयोग करें
+    let name = document.getElementById("userName").textContent;
+    let mobile = document.getElementById("userMobile").textContent;
+    let invoiceNumber = document.getElementById("invoiceNumber").textContent;
+    let date = document.getElementById("dateTime").textContent;
+    let amount = document.getElementById("totalAmount").textContent;
+
+    doc.setFontSize(16);
+    doc.text("Invoice", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Name: ${name}`, 20, 40);
+    doc.text(`Mobile: ${mobile}`, 20, 50);
+    doc.text(`Invoice No: ${invoiceNumber}`, 20, 60);
+    doc.text(`Date: ${date}`, 20, 70);
+    doc.text(`Total Amount: ₹${amount}`, 20, 80);
+
+    // PDF को Blob में कन्वर्ट करें
+    let pdfBlob = doc.output("blob");
+
+    // Blob को Data URL में कन्वर्ट करें
+    let reader = new FileReader();
+    reader.readAsDataURL(pdfBlob);
+    reader.onloadend = function () {
+        let pdfBase64 = reader.result.split(',')[1];
+
+        // WhatsApp पर भेजने का मैसेज
+        let message = `📄 *Invoice Details* \n\n` +
+                      `👤 Name: ${name} \n📞 Mobile: ${mobile} \n` +
+                      `🧾 Invoice No: ${invoiceNumber} \n📅 Date: ${date} \n💰 Total: ₹${amount}`;
+
+        let whatsappUrl = `https://wa.me/${mobile}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank'); // WhatsApp Open करेगा
+    };
+}
+
+        function printInvoice() {
+            window.print(); // Invoice Print करेगा
+        }
+    </script>
+
+</body>
+</html>
