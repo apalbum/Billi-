@@ -80,7 +80,9 @@
             "Bag": ["NORMAL Bag","LAPTOP Bag", "Leather PHOTO Bag", "Leather Bag"],
             "EALBUM": ["E-Album LIFETIME"],
             "CALENDAR": ["PHOTO CALENDAR", "NORMAL CALENDAR", "TABLE CALENDAR"],
-            "MINIBOOK": ["6X9 ALBUM" ],
+            "MINIBOOK": ["6X9 ALBUM","COVER" ],
+            "DESIGNING": ["NORMAL DESIGNING","CLASSIC DESIGNING"],
+            "COURIER": ["COURIER CHARGE"],
         };
 
         function addItem() {
@@ -93,9 +95,7 @@
             let cell4 = row.insertCell(3);
             let cell5 = row.insertCell(4);
             let cell6 = row.insertCell(5);
-            let cell7 = row.insertCell(6);
-            let cell8 = row.insertCell(7);
-            let cell9 = row.insertCell(8);
+           
 
             let categorySelect = document.createElement("select");
             categorySelect.innerHTML = `
@@ -107,6 +107,8 @@
                 <option value="EALBUM">EALBUM</option>
                 <option value="CALENDAR">CALENDAR</option>
                 <option value="MINIBOOK">MINIBOOK</option>
+                <option value="DESIGNING">DESIGNING</option>
+                <option value="COURIER">COURIER</option>
             `;
             categorySelect.onchange = function() { updateSheetOptions(row, categorySelect.value); };
             cell1.appendChild(categorySelect);
