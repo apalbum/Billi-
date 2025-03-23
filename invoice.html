@@ -73,11 +73,14 @@
 
         // Category-wise Sheet Options
         const categorySheets = {
-            "NTR": ["NTR Norma", "NTR height", "NTR Premium"],
-            "Cover": ["Soft Cover", "Hard Cover", "Leather Cover"],
-            "TP/Poster": ["Glossy Poster", "Matte Poster", "Photo Poster"],
-            "Combo Box": ["Small Combo", "Medium Combo", "Large Combo"],
-            "Bag": ["Plastic Bag", "Canvas Bag", "Leather Bag"]
+            "Page": ["NTR ", "HEAVY NTR", "GLOSSY","HEAVY GLOSSY"],
+            "Cover": ["Normal Cover", "SPARKLE Cover", "3D Cover"],
+            "TP/Poster": ["Glossy Poster", "TRANSARENT PAGE"],
+            "Combo Box": ["TANI Combo", "LEATHER Combo", "NORMAL Combo"],
+            "Bag": ["NORMAL Bag","LAPTOP Bag", "Leather PHOTO Bag", "Leather Bag"],
+            "EALBUM": ["E-Album LIFETIME"],
+            "CALENDAR": ["PHOTO CALENDAR", "NORMAL CALENDAR", "TABLE CALENDAR"],
+            "MINIBOOK": ["6X9 ALBUM" ],
         };
 
         function addItem() {
@@ -90,20 +93,26 @@
             let cell4 = row.insertCell(3);
             let cell5 = row.insertCell(4);
             let cell6 = row.insertCell(5);
+            let cell7 = row.insertCell(6);
+            let cell8 = row.insertCell(7);
+            let cell9 = row.insertCell(8);
 
             let categorySelect = document.createElement("select");
             categorySelect.innerHTML = `
-                <option value="NTR">NTR</option>
+                <option value="Page">Page</option>
                 <option value="Cover">Cover</option>
                 <option value="TP/Poster">TP/Poster</option>
                 <option value="Combo Box">Combo Box</option>
                 <option value="Bag">Bag</option>
+                <option value="EALBUM">EALBUM</option>
+                <option value="CALENDAR">CALENDAR</option>
+                <option value="MINIBOOK">MINIBOOK</option>
             `;
             categorySelect.onchange = function() { updateSheetOptions(row, categorySelect.value); };
             cell1.appendChild(categorySelect);
 
             let sheetSelect = document.createElement("select");
-            updateSheetOptions(row, "NTR");
+            updateSheetOptions(row, "Page");
             cell2.appendChild(sheetSelect);
 
             cell3.innerHTML = `<input type="number" value="1" oninput="calculateTotal()">`;
